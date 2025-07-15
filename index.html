@@ -1108,6 +1108,26 @@
         </div>
     </footer>
 
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script>
+      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+      const firebaseConfig = {
+        apiKey: "AIzaSyCPsR6tfrC2lxxu925OJEL-gVR_eSvi8FE",
+        authDomain: "magentimjoinbetaprogram.firebaseapp.com",
+        projectId: "magentimjoinbetaprogram",
+        storageBucket: "magentimjoinbetaprogram.firebasestorage.app",
+        messagingSenderId: "100068877992",
+        appId: "1:100068877992:web:38f5efb3b1f490335e449d",
+        measurementId: "G-QW0B28CBTG"
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+    </script>
     <script>
         // Modal functions
         function openBetaModal() {
@@ -1124,22 +1144,31 @@
             event.preventDefault();
             const form = document.getElementById('betaForm');
             const successMessage = document.getElementById('successMessage');
-            
-            // Simulate form submission
-            form.style.display = 'none';
-            successMessage.style.display = 'block';
-            
-            // In real implementation, send data to backend
+
+            // Gather form data
             const formData = new FormData(form);
-            console.log('Beta signup:', Object.fromEntries(formData));
-            
-            // Reset after 3 seconds
-            setTimeout(() => {
-                closeBetaModal();
-                form.style.display = 'block';
-                successMessage.style.display = 'none';
-                form.reset();
-            }, 3000);
+            const data = {
+                email: formData.get('email'),
+                request: formData.get('request'),
+                updates: formData.get('updates') === 'on',
+                timestamp: new Date().toISOString()
+            };
+
+            // Send to Firestore
+            db.collection('beta_signups').add(data)
+              .then(() => {
+                  form.style.display = 'none';
+                  successMessage.style.display = 'block';
+                  setTimeout(() => {
+                      closeBetaModal();
+                      form.style.display = 'block';
+                      successMessage.style.display = 'none';
+                      form.reset();
+                  }, 3000);
+              })
+              .catch((error) => {
+                  alert('Error submitting form: ' + error.message);
+              });
         }
 
         // Close modal when clicking outside
